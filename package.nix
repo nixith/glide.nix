@@ -68,7 +68,8 @@ stdenv.mkDerivation (finalAttrs: {
   nativeBuildInputs = [
     copyDesktopItems
     makeBinaryWrapper
-  ] ++ lib.optionals stdenv.isLinux [
+  ]
+  ++ lib.optionals stdenv.isLinux [
     autoPatchelfHook
     patchelfUnstable
     wrapGAppsHook3
@@ -116,49 +117,54 @@ stdenv.mkDerivation (finalAttrs: {
 
   unpackPhase = lib.optionalString stdenv.isDarwin ''
     runHook preUnpack
-    
+
     /usr/bin/hdiutil attach -nobrowse -readonly $src
     cp -r /Volumes/Glide/Glide.app .
     /usr/bin/hdiutil detach /Volumes/Glide
-    
+
     runHook postUnpack
-    '';
+  '';
   preFixup = lib.optionals stdenv.isLinux ''
     gappsWrapperArgs+=(
         --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [ ffmpeg_7 ]}"
       )
   '';
 
-  installPhase = if stdenv.isLinux then ''
-    runHook preInstall
+  installPhase =
+    if stdenv.isLinux then
+      ''
+        runHook preInstall
 
-    mkdir -p $out/bin $out/share/icons/hicolor/ $out/lib/glide-browser-bin-${finalAttrs.version}
-    cp -t $out/lib/glide-browser-bin-${finalAttrs.version} -r *
-    chmod +x $out/lib/glide-browser-bin-${finalAttrs.version}/glide
-    iconDir=$out/share/icons/hicolor
-    browserIcons=$out/lib/glide-browser-bin-${finalAttrs.version}/browser/chrome/icons/default
+        mkdir -p $out/bin $out/share/icons/hicolor/ $out/lib/glide-browser-bin-${finalAttrs.version}
+        cp -t $out/lib/glide-browser-bin-${finalAttrs.version} -r *
+        chmod +x $out/lib/glide-browser-bin-${finalAttrs.version}/glide
+        iconDir=$out/share/icons/hicolor
+        browserIcons=$out/lib/glide-browser-bin-${finalAttrs.version}/browser/chrome/icons/default
 
-    for i in 16 32 48 64 128; do
-      iconSizeDir="$iconDir/''${i}x$i/apps"
-      mkdir -p $iconSizeDir
-      cp $browserIcons/default$i.png $iconSizeDir/glide-browser.png
-    done
+        for i in 16 32 48 64 128; do
+          iconSizeDir="$iconDir/''${i}x$i/apps"
+          mkdir -p $iconSizeDir
+          cp $browserIcons/default$i.png $iconSizeDir/glide-browser.png
+        done
 
-    ln -s $out/lib/glide-browser-bin-${finalAttrs.version}/glide $out/bin/glide
-    ln -s $out/bin/glide $out/bin/glide-browser
+        ln -s $out/lib/glide-browser-bin-${finalAttrs.version}/glide $out/bin/glide
+        ln -s $out/bin/glide $out/bin/glide-browser
 
-    runHook postInstall
-  '' else ''
-    runHook preInstall
+        runHook postInstall
+      ''
+    else
+      ''
+        runHook preInstall
 
-    mkdir -p $out/Applications
-    cp -r Glide.app $out/Applications/
-    
-    mkdir -p $out/bin
-    ln -s $out/Applications/Glide.app/Contents/MacOS/glide $out/bin/glide
-    ln -s $out/bin/glide $out/bin/glide-browser
+        mkdir -p $out/Applications
+        cp -r Glide.app $out/Applications/
 
-    runHook postInstall
+        mkdir -p $out/bin
+        ln -s $out/Applications/Glide.app/Contents/MacOS/glide $out/bin/glide
+        ln -s $out/bin/glide $out/bin/glide-browser
+
+        runHook postInstall
+      '';
 
   # WebGL/Graphics settings via environment variables
   shellHook = lib.optionals stdenv.isLinux ''
@@ -221,7 +227,12 @@ stdenv.mkDerivation (finalAttrs: {
     homepage = "https://glide-browser.app/";
     license = lib.licenses.mpl20;
     sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];
-    platforms = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+    platforms = [
+      "x86_64-linux"
+      "aarch64-linux"
+      "x86_64-darwin"
+      "aarch64-darwin"
+    ];
     maintainers = with lib.maintainers; [ pyrox0 ];
     mainProgram = "glide-browser";
   };
