@@ -12,7 +12,7 @@
   hicolor-icon-theme,
   libXtst,
   libva,
-  makeBinaryWrapper,
+  makeBinaryWrapper, # test diff
   makeDesktopItem,
   patchelfUnstable,
   pciutils,
